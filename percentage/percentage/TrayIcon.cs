@@ -56,7 +56,7 @@ namespace percentage
                     using (Icon icon = Icon.FromHandle(intPtr))
                     {
                         notifyIcon.Icon = icon;
-                        notifyIcon.Text = batteryPercentage + "%";
+                        notifyIcon.Text = batteryPercentage;
                     }
                 }
                 finally
