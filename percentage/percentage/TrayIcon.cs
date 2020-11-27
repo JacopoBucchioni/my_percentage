@@ -36,16 +36,13 @@ namespace percentage
             batteryPercentage = "?";
 
             notifyIcon.Visible = true;
+            iconUpdate();
 
             Timer timer = new Timer();
             timer.Tick += new EventHandler(timer_Tick);
             
-            timer.Interval = 1000; // in miliseconds
+            timer.Interval = 60000; // in miliseconds
             timer.Start();
-            
-            //timer.Start(); PROVA
-            //timer.Interval = 60000; 
-            
         }
 
         private void timer_Tick(object sender, EventArgs e)
