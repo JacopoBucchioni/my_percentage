@@ -10,8 +10,8 @@ namespace percentage
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         static extern bool DestroyIcon(IntPtr handle);
 
-        private const string iconFont = "Segoe UI";
-        private const int iconFontSize = 14;
+        private const string iconFont = "MS Sans Serif";
+        private const int iconFontSize = 10;
 
         private string batteryPercentage;
         private NotifyIcon notifyIcon;
@@ -40,7 +40,7 @@ namespace percentage
             Timer timer = new Timer();
             timer.Tick += new EventHandler(timer_Tick);
             
-            timer.Interval = 60000; // in miliseconds
+            timer.Interval = 1000; // in miliseconds
             timer.Start();
             
             //timer.Start(); PROVA
