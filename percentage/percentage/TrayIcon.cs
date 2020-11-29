@@ -11,9 +11,12 @@ namespace percentage
         static extern bool DestroyIcon(IntPtr handle);
 
 		private const string iconFont = "Verdana";
-		private int iconFontSize = 22;
+		private int iconFontSize;
+		Color textColor;
 		private int batteryPercentage;
+		private bool charging;
         private NotifyIcon notifyIcon;
+		
 
         public TrayIcon()
         {
@@ -33,6 +36,10 @@ namespace percentage
             notifyIcon.ContextMenu = contextMenu;
 
             batteryPercentage = 0;
+			charging = false;
+
+			iconFontSize = 22;
+			textColor = Color.White;
 
             notifyIcon.Visible = true;
 
@@ -52,16 +59,20 @@ namespace percentage
 
 		private void iconUpdate()
 		{
-			PowerStatus powerStatus = SystemInformation.PowerStatus;
-			batteryPercentage = (int)(powerStatus.BatteryLifePercent * 100);
-			bool charging = SystemInformation.PowerStatus.BatteryChargeStatus.HasFlag(BatteryChargeStatus.Charging);
-			Color textColor = Color.White;
-
+			batteryPercentage = (int)(SystemInformation.PowerStatus.BatteryLifePercent * 100);
+			charging = SystemInformation.PowerStatus.BatteryChargeStatus.HasFlag(BatteryChargeStatus.Charging);
+	
 			if (batteryPercentage == 100)
 				iconFontSize = 18;
+			else
+				iconFontSize = 22;
+
 
 			if (batteryPercentage <= 15 && !charging)
 				textColor = Color.Red;
+			else
+				textColor = Color.White;
+
 
 			using (Bitmap bitmap = new Bitmap(DrawText(batteryPercentage.ToString(), new Font(iconFont, iconFontSize, FontStyle.Regular, GraphicsUnit.Pixel), textColor, Color.Transparent)))
 			{
