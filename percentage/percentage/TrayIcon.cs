@@ -2,8 +2,6 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using System.IO;
-
 
 namespace percentage
 {
@@ -12,7 +10,9 @@ namespace percentage
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         static extern bool DestroyIcon(IntPtr handle);
 
-        private int batteryPercentage;
+		private const string iconFont = "Verdana";
+		private int iconFontSize = 22;
+		private int batteryPercentage;
         private NotifyIcon notifyIcon;
 
         public TrayIcon()
@@ -40,7 +40,7 @@ namespace percentage
 
             Timer timer = new Timer();
             timer.Tick += new EventHandler(Timer_Tick);
-            timer.Interval = 1000; // in miliseconds // Update every 5 minutes
+            timer.Interval = 5000; // in miliseconds
 			// timer.Enabled = true;
 			timer.Start();
         }
@@ -53,63 +53,31 @@ namespace percentage
 		private void iconUpdate()
 		{
 			PowerStatus powerStatus = SystemInformation.PowerStatus;
-			batteryPercentage = (int)Math.Round((powerStatus.BatteryLifePercent * 100), 0);
+			batteryPercentage = (int)(powerStatus.BatteryLifePercent * 100);
+			bool charging = SystemInformation.PowerStatus.BatteryChargeStatus.HasFlag(BatteryChargeStatus.Charging);
+			Color textColor = Color.White;
 
-			Color foreground = Color.White;
-			Color background = Color.Transparent;
+			if (batteryPercentage == 100)
+				iconFontSize = 18;
 
-			string drawMe = batteryPercentage.ToString();
-			Font fontToUse;
-			Brush brushToUse = new SolidBrush(foreground);
-			Rectangle rect;
-			Bitmap bitmapText;
-			Graphics g;
+			if (batteryPercentage <= 15 && !charging)
+				textColor = Color.Red;
 
-			if(batteryPercentage == 100)
-            {
-				fontToUse = new Font("Verdana", 18, FontStyle.Regular, GraphicsUnit.Pixel);
-			}
-            else
-            {
-				fontToUse = new Font("Verdana", 22, FontStyle.Regular, GraphicsUnit.Pixel);
-			}
-			
-			
-
-			rect = new Rectangle(-6, 2, 42, 32);
-			bitmapText = new Bitmap(32, 32);
-
-			g = Graphics.FromImage(bitmapText);
-			g.Clear(background);
-
-			using (SolidBrush brush = new SolidBrush(background))
+			using (Bitmap bitmap = new Bitmap(DrawText(batteryPercentage.ToString(), new Font(iconFont, iconFontSize, FontStyle.Regular, GraphicsUnit.Pixel), textColor, Color.Transparent)))
 			{
-				g.FillRectangle(brush, 0, 0, 32, 32);
-			}
-			g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
-			StringFormat sf = new StringFormat();
-			sf.Alignment = StringAlignment.Center;
-			sf.LineAlignment = StringAlignment.Center;
-			g.DrawString(drawMe, fontToUse, brushToUse, rect, sf);
-			g.Save();
-
-			System.IntPtr intPtr = bitmapText.GetHicon();
-			try
-			{
-				using (Icon icon = Icon.FromHandle(intPtr))
+				System.IntPtr intPtr = bitmap.GetHicon();
+				try
 				{
-					notifyIcon.Icon = icon;
+					using (Icon icon = Icon.FromHandle(intPtr))
+					{
+						notifyIcon.Icon = icon;
+					}
+				}
+				finally
+				{
+					DestroyIcon(intPtr);
 				}
 			}
-			finally
-			{
-				DestroyIcon(intPtr);
-			}
-
-
-			//	hIcon = (bitmapText.GetHicon());
-			//	notifyIcon.Icon = System.Drawing.Icon.FromHandle(hIcon);
-			//	notifyIcon.Text = "Remaining " + batteryPercentage.ToString() + "%";
 
 		}
 
@@ -120,5 +88,37 @@ namespace percentage
             Application.Exit();
         }
 
-    }
+
+		private Image DrawText(String text, Font font, Color textColor, Color backColor)
+		{
+
+
+			Image bitmapImage = new Bitmap(32, 32);
+			Rectangle rect = new Rectangle(-6, 2, 42, 32);
+			using (Graphics g = Graphics.FromImage(bitmapImage))
+            {
+				g.Clear(backColor);
+				using (SolidBrush brush = new SolidBrush(backColor))
+				{
+					g.FillRectangle(brush, 0, 0, 32, 32);
+				}
+				using (Brush textBrush = new SolidBrush(textColor))
+				{
+					g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+					using (StringFormat sf = new StringFormat())
+                    {
+						sf.Alignment = StringAlignment.Center;
+						sf.LineAlignment = StringAlignment.Center;
+
+						g.DrawString(text, font, textBrush, rect, sf);
+						g.Save();
+					}
+				}
+
+			}
+
+			return bitmapImage;
+		}
+
+	}
 }
