@@ -16,5 +16,5 @@ This project was compiled with Visual Studio Professional 2019.
 
 ## Contributing
 
-I created this project from the kas's percentage repo adding some cool features in my opinion :) contributions are extremely welcome!
+I created this project from kas's percentage repo adding some cool features in my opinion :) contributions are extremely welcome!
 
